@@ -1,38 +1,41 @@
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
-{
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public float speed = 8f;//ÅºÀÌµ¿¼Ó·Â
-    private Rigidbody bulletRigidbody;
+public class Bullet : MonoBehaviour {
+    public float speed = 8f; // ì´ì•Œ ì´ë™ ì†ë ¥
+    private Rigidbody bulletRigidbody; // ì´ë™ì— ì‚¬ìš©í•  ë¦¬ì§€ë“œë°”ë”” ì»´í¬ë„ŒíŠ¸
 
-    void Start()
-    {
-        //ÀÌ½ºÅ©¸³Æ®°¡ ºÙ¾îÀÖ´Â ¿ÀºêÁ§Æ®ÀÇ ¸®Áöµå¹Ùµğ ÄÄÆ÷³ÍÆ® ÇÒ´ç
+    void Start() {
+        // ê²Œì„ ì˜¤ë¸Œì íŠ¸ì—ì„œ Rigidbody ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì•„ bulletRigidbodyì— í• ë‹¹
         bulletRigidbody = GetComponent<Rigidbody>();
-        //
+        // ë¦¬ì§€ë“œë°”ë””ì˜ ì†ë„ = ì•ìª½ ë°©í–¥ * ì´ë™ ì†ë ¥
         bulletRigidbody.linearVelocity = transform.forward * speed;
+
+        // 3ì´ˆ ë’¤ì— ìì‹ ì˜ ê²Œì„ ì˜¤ë¸Œì íŠ¸ íŒŒê´´
+      //  Destroy(gameObject, 8f);
     }
-    // Æ®¸®°Å Ãæµ¹ ½Ã ÀÚµ¿À¸·Î ½ÇÇàµÇ´Â ¸Ş¼­µå
-    private void OnTriggerEnter(Collider other)
-    {
-        //Ãæµ¹ÇÑ »ó´ë ¿ÀºêÁ§Æ®ÀÇ ÅÂ±×°¡ player¶ó¸é..
-        if(other.tag=="Player")//==> .tag ÅÂ±×ÀÌ¸§
+
+    // íŠ¸ë¦¬ê±° ì¶©ëŒì‹œ ìë™ìœ¼ë¡œ ì‹¤í–‰ë˜ëŠ” ë©”ì„œë“œ
+    void OnTriggerEnter(Collider other) {
+        // ì¶©ëŒí•œ ìƒëŒ€ë°© ê²Œì„ ì˜¤ë¸Œì íŠ¸ê°€ Player íƒœê·¸ë¥¼ ê°€ì§„ ê²½ìš°
+        if (other.tag == "Player")
         {
-            //»ó´ë¹æ Gameobject¿¡¼­ PlayerController ÄÄÆ÷³ÍÆ®(½ºÅ©¸³Æ®) °¡Á®¿À±â
-            PlayerController playerController =
-                other.GetComponent<PlayerController>();//other´Â ´Ù¸¥ ¿ÀºêÁ§Æ®¿¡ ºÙÀº ÄÄÆ÷³ÍÆ® °¡Á®¿À±â¶§¹® ÀÚ½Å°Å´Â ±×³É getcomponent ,<>¾È¿¡´Â Å¸ÀÔÀÌ¸§
-            //½ºÅ©¸³Æ®¸¦ °¡Á®¿À´Âµ¥ ¼º°øÇß´Ù¸é
-            if(playerController!=null)
+            // ìƒëŒ€ë°© ê²Œì„ ì˜¤ë¸Œì íŠ¸ì—ì„œ PlayerController ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì˜¤ê¸°
+            PlayerController playerController
+                = other.GetComponent<PlayerController>();
+
+            // ìƒëŒ€ë°©ìœ¼ë¡œë¶€í„° PlayerController ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì˜¤ëŠ”ëŒ€ ì„±ê³µí–ˆë‹¤ë©´
+            if (playerController != null)
             {
-                //Die()È£ÃâÇØ¼­ ÇÃ·¹ÀÌ¾î ºñÈ°¼ºÈ­ ½ÃÅ°±â
+                // ìƒëŒ€ë°© PlayerController ì»´í¬ë„ŒíŠ¸ì˜ Die() ë©”ì„œë“œ ì‹¤í–‰
                 playerController.Die();
             }
+
         }
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
+        if (other.tag == "Wall")
+        {
+            Destroy(gameObject);
+        }
     }
 }

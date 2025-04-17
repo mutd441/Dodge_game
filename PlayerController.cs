@@ -1,59 +1,101 @@
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class PlayerController : MonoBehaviour
-{
-    private Rigidbody playerRigidbody;//ÀÌµ¿¿¡ »ç¿ëÇÒ rigidbodyÄÄÆ÷³ÍÆ®
-    public float speed = 8f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()//½ºÅ©¸³Æ®°¡ ½ÇÇàµÉ ¶§ Ã³À½ µü ÇÑ¹ø ½ÇÇàµÇ´Â °Í(ÃÊ±âÈ­ÇÔ¼ö)
-    {
-        //ÄÄÆ÷³ÍÆ®Á¤º¸¸¦ ¾ò¾î¿È+ÁÖ¾î°¡¾ø´Â°ÍÀº ºÙ¾îÀÖ´Â ½ºÅ©¸³Æ®°¡ ÁÖ¾îÀÌ±â¶§¹®¿¡ »ı·«
+public class PlayerController : MonoBehaviour {
+    private Rigidbody playerRigidbody; // ì´ë™ì— ì‚¬ìš©í•  ë¦¬ì§€ë“œë°”ë”” ì»´í¬ë„ŒíŠ¸
+    public float speed = 8f; // ì´ë™ ì†ë ¥
+
+    //DashìŠ¤í‚¬
+    float dashDistance = 2f;
+    bool isCool = false;//ì¿¨íƒ€ì„ ìƒíƒœ ì•„ë‹˜(ëŒ€ì‰¬ ì‚¬ìš©ê°€ëŠ¥)
+    float dashCoolTime = 5f;//ì¿¨íƒ€ì„ì´ ëª‡ì´ˆì¸ì§€
+    float dashCoolTimer = 0f;//ëŒ€ì‰¬ ì‚¬ìš© í›„ ì–¼ë§ˆë‚˜ ì§€ë‚¬ëŠ”ì§€
+    void Start() {
+        // ê²Œì„ ì˜¤ë¸Œì íŠ¸ì—ì„œ Rigidbody ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì•„ playerRigidbodyì— í• ë‹¹
         playerRigidbody = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        //Input Manager¿¡ÀÖ´Â Horizontal¿¡¼­ ¹æÇâÀ» ¾ò¾î¿È(1,-1)
+    void Update() {
+        // ìˆ˜í‰ê³¼ ìˆ˜ì§ ì¶• ì…ë ¥ ê°’ì„ ê°ì§€í•˜ì—¬ ì €ì¥
         float xInput = Input.GetAxis("Horizontal");
         float zInput = Input.GetAxis("Vertical");
-        //¹æÇâ*¼Óµµ
+       
+
+
+        // ì‹¤ì œ ì´ë™ ì†ë„ë¥¼ ì…ë ¥ ê°’ê³¼ ì´ë™ ì†ë ¥ì„ í†µí•´ ê²°ì •
         float xSpeed = xInput * speed;
         float zSpeed = zInput * speed;
-        //»ı¼º¹æ¹ı newÅ°¿öµå
-        Vector3 newVelocity = new Vector3(xSpeed, 0f, zSpeed);//»ı¼ºÀÚÈ£Ãâ
-        playerRigidbody.linearVelocity = newVelocity;//½ÇÃ¼ ÀÌµ¿±¸Çö velocity speed°ª¸¸Å­¸¸ ÀÌµ¿
 
-        /*
-        if (Input.GetKey(KeyCode.UpArrow)==true)
+        //ë°©í–¥í‚¤ ë°©í–¥ìœ¼ë¡œ ë°”ë¼ë³´ê¸°
+        Vector3 moveDirection = new Vector3(xInput, 0f, zInput);
+        if (moveDirection != Vector3.zero)
         {
-            //À§ÂÊ ¹æÇâÅ° ÀÔ·ÂÀÌ °¨ÁöµÇ¸é Z¹æÇâ¿¡ ÈûÁÖ±â AddForce´Â °¡¼Ó
-            playerRigidbody.AddForce(0f, 0f, speed);
+            transform.rotation = Quaternion.LookRotation(moveDirection);
         }
-        if (Input.GetKey(KeyCode.DownArrow) == true)
+
+        // ìŠ¤í˜ì´ìŠ¤ë°” ëˆ„ë¥´ë©´ ìˆœê°„ ëŒ€ì‰¬
+        if(!isCool)//ì¿¨íƒ€ì„ìƒíƒœê°€ ì•„ë‹ ë•Œ(ëŒ€ì‰¬ì‚¬ìš©ê°€ëŠ¥)
         {
-            //¾Æ·¡ÂÊ ¹æÇâÅ° ÀÔ·ÂÀÌ °¨ÁöµÇ¸é Z¹æÇâ¿¡ ÈûÁÖ±â 
-            playerRigidbody.AddForce(0f, 0f, -speed);
+            if (Input.GetKeyDown(KeyCode.Space) && moveDirection != Vector3.zero)
+            {
+                transform.position += moveDirection.normalized * dashDistance;
+                isCool = true;//ì¿¨íƒ€ì„ ìƒíƒœ ëŒì…
+                dashCoolTimer = 0f;
+                
+
+            }
         }
-        if (Input.GetKey(KeyCode.RightArrow) == true)
+        else//ì¿¨íƒ€ì„ ìƒíƒœì¼ ë•Œ (ëŒ€ì‰¬ì‚¬ìš© ë¶ˆê°€ëŠ¥)
         {
-            //¿À¸¥ÂÊ ¹æÇâÅ° ÀÔ·ÂÀÌ °¨ÁöµÇ¸é X¹æÇâ¿¡ ÈûÁÖ±â 
-            playerRigidbody.AddForce(speed, 0f, 0f);
+            dashCoolTimer += Time.deltaTime;//íƒ€ì´ë¨¸ ì‹œê°„ì¦ê°€
+            switch (dashCoolTimer)
+            {
+                case 1:
+                    Debug.Log("ìŠ¤í‚¬ì‚¬ìš©ê¹Œì§€ 4ì´ˆ");
+                    break;
+
+                case 2:
+                    Debug.Log("ìŠ¤í‚¬ì‚¬ìš©ê¹Œì§€ 3ì´ˆ");
+                    break;
+
+                case 3:
+                    Debug.Log("ìŠ¤í‚¬ì‚¬ìš©ê¹Œì§€ 2ì´ˆ");
+                    break;
+
+                case 4:
+                    Debug.Log("ìŠ¤í‚¬ì‚¬ìš©ê¹Œì§€ 1ì´ˆ");
+                    break;
+
+            }
+            if (dashCoolTimer >= dashCoolTime)
+            {
+                isCool = false;
+                Debug.Log("ìŠ¤í‚¬ ì¤€ë¹„ ì™„ë£Œ!");
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space) && moveDirection != Vector3.zero)
+            {
+                Debug.Log("ì¿¨íƒ€ì„ ì¤‘! ì‚¬ìš© ë¶ˆê°€");
+            }
         }
-        if (Input.GetKey(KeyCode.LeftArrow) == true)
-        {
-            //¿ŞÂÊ ¹æÇâÅ° ÀÔ·ÂÀÌ °¨ÁöµÇ¸é X¹æÇâ¿¡ ÈûÁÖ±â
-            playerRigidbody.AddForce(-speed, 0f, 0f);
-        }
-        */
+
+
+
+            // Vector3 ì†ë„ë¥¼ (xSpeed, 0, zSpeed)ìœ¼ë¡œ ìƒì„±
+            Vector3 newVelocity = new Vector3(xSpeed, 0f, zSpeed);
+        // ë¦¬ì§€ë“œë°”ë””ì˜ ì†ë„ì— newVelocityë¥¼ í• ë‹¹
+        playerRigidbody.linearVelocity = newVelocity;
     }
-    public void Die()//ÇÃ·¹ÀÌ¾î°¡ Á×À¸¸é È£ÃâµÇ´Â ÇÔ¼ö
-    {
-         //this: ÇØ´çÅ¬·¡½º¸¦ °¡¸®Å°´Â °´Ã¼
-        gameObject.SetActive(false);  //gameObjectÇØ´ç ½ºÅ©¸³Æ®°¡ Àû¿ëµÇ¾îÀÖ´Â ¿ÀºêÁ§Æ® (Áö±İÀº player)
-        GameManager gameManager=FindFirstObjectByType<GameManager>();//GameMangaer½ºÅ©¸³Æ®(ÄÄÆ÷³ÍÆ®Ãë±Ş)¿¡¼­ GameManagerÇüÀÎ Ã¹¹øÂ°¿ÀºêÁ§Æ®¸¦ ¹Ş¾Æ¿Í
-        //gameManager º¯¼ö¿¡ ÇÒ´ç  
-        gameManager.EndGame();//GamemanagerÀÇendgamceÇÔ¼ö È£Ãâ
-        
+
+    public void Die() {
+        // ìì‹ ì˜ ê²Œì„ ì˜¤ë¸Œì íŠ¸ë¥¼ ë¹„í™œì„±í™”
+        gameObject.SetActive(false);
+
+        // ì”¬ì— ì¡´ì¬í•˜ëŠ” GameManager íƒ€ì…ì˜ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì•„ì„œ ê°€ì ¸ì˜¤ê¸°
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        // ê°€ì ¸ì˜¨ GameManager ì˜¤ë¸Œì íŠ¸ì˜ EndGame() ë©”ì„œë“œ ì‹¤í–‰
+        gameManager.EndGame();
     }
 }
